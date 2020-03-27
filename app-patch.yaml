@@ -1,0 +1,29 @@
+spec:
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-status: "update"
+        vault.hashicorp.com/agent-inject-secret-index.html: "my-secrets/my-secret"
+        vault.hashicorp.com/agent-inject-template-index.html: |
+          <html>
+          <body>
+          <h1>Welcome to the Vault-k8s demo!</h1>
+          <p>Please find some secrets retrieved from Vault :</p>
+          {{- with secret "my-secrets/my-secret" -}}
+          <ul>
+          <li><pre>username: {{ .Data.username }}</pre></li>
+          <li><pre>password: {{ .Data.password }}</pre></li>
+          </ul>
+          {{- end }}
+          </body>
+          </html>
+        vault.hashicorp.com/namespace: "namespace-demo"
+        vault.hashicorp.com/role: "myrole"
+    spec:
+      containers:
+      - name: nginx
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "ln -sfF /vault/secrets/index.html /usr/share/nginx/html/index.html"]    
